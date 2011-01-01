@@ -7,7 +7,9 @@ Simple activation plugin.
 Example
 =======
 
-Example goes here.
+class User < ActiveRecord:: Base
+  acts_as_activatable
+end
 
 
 Copyright (c) 2010 Adam Cuppy of Define Your Edge, released under the MIT license
