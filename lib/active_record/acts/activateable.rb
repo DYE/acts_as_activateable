@@ -6,20 +6,22 @@ module ActiveRecord
       end
       
       module ClassMethods
-        def acts_as_activateable(column = :active)
-          @configurations = { :column => :active, :default => true }
-          @configurations.update(options)
+        def acts_as_activateable(options = {})
+          @configuration = { 
+          	:column => :active, 
+          	:default => true 
+          }.update(options)
           
           send :include, InstanceMethods
         end
         
         # Client.enable_all!
         def enable_all!
-          all.each {|object| object.active = true; object.save; }
+          all.each {|object| object.send("#{@configuration[:column]}=", true); object.save }
         end
         
         def disable_all!
-          all.each {|object| object.active = false; object.save; }
+          all.each {|object| object.send("#{@configuration[:column]}=", false); object.save; }
         end
         
         def find_enabled
@@ -33,7 +35,7 @@ module ActiveRecord
         private 
         
         def _find_all_by_active_status_of(status)
-          all(:conditions => ["active = ?", status])
+          all(:conditions => { @configuration[:column] => status })
         end
         
       end
@@ -41,24 +43,20 @@ module ActiveRecord
       module InstanceMethods
         def enable
           # send(:active, false)
-          self.active = true
-          save
+          self.send("#{@configuration[:column]}=", true); save
         end
         
         def disable
           # send(:active, true)
-          self.active = false
-          save
+          self.send("#{@configuration[:column]}=", false); save
         end
         
         def enabled?
-          self.active
+          self.send(@configuration[:column])
         end
         
         def disabled?
-          #enabled = send(column)
-          #!enabled
-          !self.active
+          !enabled?
         end
       end
     end
